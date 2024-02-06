@@ -14,8 +14,27 @@ def evaluate_standard(gt_labels, pred_labels):
     # scikit-learn APIs in way they can deal with strings 
     # as label. Remeber to import the functions you use!
 
-    accuracy = accuracy_score(gt_labels, pred_labels)
-    f1score = f1_score(gt_labels, pred_labels)
+    gt_labels_encoded = []
+    pred_labels_encoded = []
+
+    for each in gt_labels:
+        if each == "SUPPORTS":
+            gt_labels_encoded.append(1)
+        elif each == "REFUTES":
+            gt_labels_encoded.append(0)
+        else:
+            print(f'Invalid label in gt labels: {each}')
+
+    for each in pred_labels:
+        if each == "SUPPORTS":
+            pred_labels_encoded.append(1)
+        elif each == "REFUTES":
+            pred_labels_encoded.append(0)
+        else:
+            print(f'Invalid label in predicted labels: {each}')
+
+    accuracy = accuracy_score(gt_labels_encoded, pred_labels_encoded)
+    f1score = f1_score(gt_labels_encoded, pred_labels_encoded)
 
     # End of TODO.
     ##################################################
