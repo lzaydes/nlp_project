@@ -1,4 +1,5 @@
 # TODO - import relevant sklearn score modules 
+from sklearn.metrics import f1_score, accuracy_score
 
 from utils.file_utils import load_jsonl
 
@@ -12,6 +13,9 @@ def evaluate_standard(gt_labels, pred_labels):
     # predictions and ground truth labels. Please use the 
     # scikit-learn APIs in way they can deal with strings 
     # as label. Remeber to import the functions you use!
+
+    accuracy = accuracy_score(gt_labels, pred_labels)
+    f1score = f1_score(gt_labels, pred_labels)
 
     # End of TODO.
     ##################################################
