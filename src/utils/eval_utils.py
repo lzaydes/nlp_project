@@ -1,7 +1,7 @@
 # TODO - import relevant sklearn score modules 
 from sklearn.metrics import f1_score, accuracy_score
 
-from utils.file_utils import load_jsonl
+from src.utils.file_utils import load_jsonl
 
 def evaluate_standard(gt_labels, pred_labels):
     

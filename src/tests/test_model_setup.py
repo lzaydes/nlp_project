@@ -1,4 +1,4 @@
-from phi.phi_utils.model_setup import model_and_tokenizer_setup
+from src.phi.phi_utils.model_setup import model_and_tokenizer_setup
 
 if __name__ == "__main__":
     

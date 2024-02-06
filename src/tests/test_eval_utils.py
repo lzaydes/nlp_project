@@ -1,4 +1,4 @@
-from utils.eval_utils import evaluate_standard
+from src.utils.eval_utils import evaluate_standard
 
 if __name__ == "__main__":
     # dummy labels
