@@ -31,9 +31,9 @@ def model_and_tokenizer_setup(model_id_or_path):
     # Please set the argument trust_remote_code set to True
     # for both model and tokenizer load operation, as 
     # transformer verison is 4.36.2 < 4.37.0
-
-    model = PhiForCausalLM.from_pretrained(model_id_or_path, torch_d_type=torch.float16, attn_implementation="flash_attention_2", trust_remote_code=True).to("cuda")
-    tokenizer = AutoTokenizer.from_pretrained(model_id_or_path, trust_remote_code=True, padding="left", pad_token="eos_token")
+    eos_token = "<|endoftext|>"
+    model = PhiForCausalLM.from_pretrained(model_id_or_path, torch_dtype=torch.float16, attn_implementation="flash_attention_2", trust_remote_code=True).to("cuda")
+    tokenizer = AutoTokenizer.from_pretrained(model_id_or_path, trust_remote_code=True, padding_side="left", pad_token=eos_token)
     
     # End of TODO.
     ##################################################
