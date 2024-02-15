@@ -28,21 +28,23 @@ class PhiPromptDataset(Dataset):
     def __getitem__(self, idx):
 
         prompt = ""
-        
+        print("Evidence data:", self.evidence_data)
         ##################################################
         # TODO: Please complete the implementation of __getitem__
         # You may use if-else statements to choose the prompt
         # transform as per the prompt type given to you.
-        if idx == 'zero_eval':
+        if self.prompt_type == 'zero_eval':
             prompt = PHI_ZERO_SHOT_EVAL_PROMPT
-        elif idx == 'few_eval':
+            prompt = prompt.format(**self.data[0])
+        elif self.prompt_type == 'few_eval':
             prompt = PHI_FEW_SHOT_EVAL_PROMPT
-        elif idx == 'zero_evidence':
+        elif self.prompt_type == 'zero_evidence':
             prompt = PHI_ZERO_SHOT_EVIDENCE_PROMPT
-        elif idx == 'zero_evidence_eval':
+        elif self.prompt_type == 'zero_evidence_eval':
             prompt = PHI_ZERO_SHOT_EVIDENCE_EVAL_PROMPT
+        prompt = prompt.format(**self.data[0])
         # End of TODO.
         ##################################################
-        
-        return prompt
+
+    return prompt
     
