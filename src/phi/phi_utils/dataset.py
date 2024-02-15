@@ -33,7 +33,14 @@ class PhiPromptDataset(Dataset):
         # TODO: Please complete the implementation of __getitem__
         # You may use if-else statements to choose the prompt
         # transform as per the prompt type given to you.
-        
+        if idx == 'zero_eval':
+            prompt = PHI_ZERO_SHOT_EVAL_PROMPT
+        elif idx == 'few_eval':
+            prompt = PHI_FEW_SHOT_EVAL_PROMPT
+        elif idx == 'zero_evidence':
+            prompt = PHI_ZERO_SHOT_EVIDENCE_PROMPT
+        elif idx == 'zero_evidence_eval':
+            prompt = PHI_ZERO_SHOT_EVIDENCE_EVAL_PROMPT
         # End of TODO.
         ##################################################
         
