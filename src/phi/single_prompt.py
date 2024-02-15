@@ -22,9 +22,9 @@ def single_prompt(model, tokenizer, prompt):
     # TODO: Please complete the implementation of this 
     # fn. You need to tokenize a single prompt, generate outputs 
     # for it, and then decode the output back to regular text. 
-    tokens = tokenizer(prompt)
-    output = model.generate(**tokens)
-    text = tokenizer.decode(output[0])
+    tokens = tokenizer(prompt, return_tensors="pt")
+    output = model.generate(**tokens, max_new_tokens=10)
+    text = tokenizer.batch_decode(output)[0]
     # End of TODO.
     #############################################################
     print("Model Response: ", text)
