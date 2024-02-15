@@ -15,6 +15,7 @@ def parse_args():
 if __name__ == "__main__":
     args = parse_args()
     dummy_gt_data = load_jsonl(args.annotations_filepath)
+    print(dummy_gt_data[0]["phi_zero_shot_evidence_prompt"])
     prompt_dataset = PhiPromptDataset(args.annotations_filepath, args.prompt_type, evidence_filepath=args.evidence_filepath)
     prompt_dataloader = DataLoader(prompt_dataset, batch_size=1, shuffle=False)
 
