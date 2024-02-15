@@ -24,7 +24,6 @@ class PhiPromptDataset(Dataset):
 
     # End of TODO.
     ##################################################
-    
     def __getitem__(self, idx):
 
         prompt = ""
@@ -47,4 +46,3 @@ class PhiPromptDataset(Dataset):
         ##################################################
         
         return prompt
-    
