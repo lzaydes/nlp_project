@@ -33,7 +33,7 @@ class PhiPromptDataset(Dataset):
         # transform as per the prompt type given to you.
         if self.prompt_type == 'zero_eval':
             prompt = PHI_ZERO_SHOT_EVAL_PROMPT
-            prompt = prompt.format(**self.data[0])
+            prompt = prompt.format(**self.data[idx])
             return prompt
         elif self.prompt_type == 'few_eval':
             prompt = PHI_FEW_SHOT_EVAL_PROMPT
@@ -41,7 +41,7 @@ class PhiPromptDataset(Dataset):
             prompt = PHI_ZERO_SHOT_EVIDENCE_PROMPT
         elif self.prompt_type == 'zero_evidence_eval':
             prompt = PHI_ZERO_SHOT_EVIDENCE_EVAL_PROMPT
-        prompt = prompt.format(**self.data[0])
+        prompt = prompt.format(**self.data[idx])
         # End of TODO.
         ##################################################
         
