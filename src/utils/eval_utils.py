@@ -44,7 +44,10 @@ def evaluate_standard(gt_labels, pred_labels):
 def model_eval_report(gt_filepath, pred_filepath):
     
     gt_data = load_jsonl(gt_filepath)
+#    print("Loaded training predictions successfully")
     gt_labels = [d["label"] for d in gt_data]
+   # pred_data = load_jsonl(pred_filepath)
+    #pred_labels = [d["label"] for d in pred_data]
     with open(pred_filepath, "r") as f:
         pred_labels = [d.strip() for d in f.readlines()]
     accuracy, f1score = evaluate_standard(gt_labels, 

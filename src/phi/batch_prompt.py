@@ -38,7 +38,10 @@ def batch_prompt(model, tokenizer, annotations_filepath, output_filepath, prompt
         # variable used in the for loop following this TODO
         # is what should be the output of the program snippet 
         # within TODO
-
+        tokens = tokenizer(batch, return_tensors="pt", padding = True, truncation = True)
+        outputs = model.generate(**tokens, max_new_tokens=10)
+        text = tokenizer.batch_decode(outputs)[0]
+        output_texts.append(text)
         # End of TODO.
         ##################################################
 

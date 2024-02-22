@@ -1,6 +1,6 @@
 # TODO - import relevant model and tokenizer modules from transformers
 import torch
-from transformers import PhiForCausalLM, AutoTokenizer 
+from transformers import AutoTokenizer, AutoModelForCausalLM
 
 # helper function provided to get model info
 def get_model_info(model):
@@ -33,7 +33,7 @@ def model_and_tokenizer_setup(model_id_or_path):
     # transformer verison is 4.36.2 < 4.37.0
     eos_token = "<|endoftext|>"
    # model = PhiForCausalLM.from_pretrained(model_id_or_path, torch_dtype=torch.float16, attn_implementation="flash_attention_2", trust_remote_code=True).to("cuda")
-    model = PhiForCausalLM.from_pretrained(model_id_or_path, torch_dtype=torch.float16, trust_remote_code=True).to("cuda")
+    model = AutoModelForCausalLM.from_pretrained(model_id_or_path, torch_dtype=torch.float16, trust_remote_code=True)
     tokenizer = AutoTokenizer.from_pretrained(model_id_or_path, trust_remote_code=True, padding_side="left", pad_token=eos_token)
     
     # End of TODO.
