@@ -41,8 +41,17 @@ class PhiPromptDataset(Dataset):
             prompt = PHI_ZERO_SHOT_EVIDENCE_PROMPT
         elif self.prompt_type == 'zero_evidence_eval':
             prompt = PHI_ZERO_SHOT_EVIDENCE_EVAL_PROMPT
+        
         prompt = prompt.format(**self.data[idx])
         # End of TODO.
         ##################################################
         
         return prompt
+
+
+    # gtp4 for classification/evidence output?
+    # zero_shot_evidence_prompt generates data for a given claim
+    # it seems that this function evaluates the results? and compares them to evidence in dummy_evidence.json
+    def zero_shot_evidence_evaluate_prompt_transform(self):
+        
+        return 
