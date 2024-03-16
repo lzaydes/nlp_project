@@ -37,12 +37,13 @@ class PhiPromptDataset(Dataset):
             return prompt
         elif self.prompt_type == 'few_eval':
             prompt = PHI_FEW_SHOT_EVAL_PROMPT
+            prompt = prompt.format(**self.data[idx])
+            return prompt
         elif self.prompt_type == 'zero_evidence':
             prompt = PHI_ZERO_SHOT_EVIDENCE_PROMPT
         elif self.prompt_type == 'zero_evidence_eval':
             prompt = PHI_ZERO_SHOT_EVIDENCE_EVAL_PROMPT
-        
-        prompt = prompt.format(**self.data[idx])
+            prompt = self.zero_shot_evidence_evaluate_prompt_transform(idx)
         # End of TODO.
         ##################################################
         
@@ -62,12 +63,10 @@ class PhiPromptDataset(Dataset):
         prompt = PHI_ZERO_SHOT_EVIDENCE_EVAL_PROMPT
         evidence = self.evidence_data
 
+        self.data[idx].update(self.evidence_data[idx])
+
         prompt = prompt.format(**self.data[idx])
-
-        ###             append evidence         ###
-        ###             TODO                    ###
-
+        print(f'{prompt}\n')
         
-
         return prompt
         
