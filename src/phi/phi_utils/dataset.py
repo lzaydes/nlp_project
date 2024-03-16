@@ -49,8 +49,10 @@ class PhiPromptDataset(Dataset):
         return prompt
 
 
-    def zero_shot_evidence_prompt_transform(self, idx)
+    def zero_shot_evidence_prompt_transform(self, idx):
         prompt = ""
+
+
         return prompt
 
     # gtp4 for classification/evidence output?
@@ -58,12 +60,14 @@ class PhiPromptDataset(Dataset):
     # it seems that this function evaluates the results? and compares them to evidence in dummy_evidence.json
     def zero_shot_evidence_evaluate_prompt_transform(self, idx):
         prompt = PHI_ZERO_SHOT_EVIDENCE_EVAL_PROMPT
-        evidence = self.zero_shot_evidence_prompt_transform(idx)
+        evidence = self.evidence_data
 
         prompt = prompt.format(**self.data[idx])
 
         ###             append evidence         ###
         ###             TODO                    ###
+
+        
 
         return prompt
         
