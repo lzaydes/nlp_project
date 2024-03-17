@@ -2,6 +2,7 @@ import pandas as pd
 from torch.utils.data import Dataset
 from utils.file_utils import load_jsonl
 from phi.phi_utils.constants import PHI_ZERO_SHOT_EVAL_PROMPT, PHI_FEW_SHOT_EVAL_PROMPT, PHI_ZERO_SHOT_EVIDENCE_EVAL_PROMPT, PHI_ZERO_SHOT_EVIDENCE_PROMPT
+from transformers import AutoTokenizer, AutoModelForCausalLM
 
 class PhiPromptDataset(Dataset):
     def __init__(self, annotations_filepath, prompt_type, evidence_filepath = None):
@@ -44,6 +45,7 @@ class PhiPromptDataset(Dataset):
 
             self.data[idx].update({"information": self.generate_information(idx)})
             prompt = prompt.format(**self.data[idx])
+            generate_evidence(prompt)
 
         elif self.prompt_type == 'zero_evidence_eval':
             prompt = PHI_ZERO_SHOT_EVIDENCE_EVAL_PROMPT
@@ -59,17 +61,38 @@ class PhiPromptDataset(Dataset):
 
     def generate_information(self, idx):
         domain = self.data[idx]["domain"]
-        info = ""
-        
+
         if domain == "sbic":
-            return ""
+            return "The claim comes from the Social Bias Inference Corpus dataset, which contains real-world human-generated social media posts.\n"
         elif domain == "toxigen":
-            return ""
+            return "The claim comes from the GPT Toxicity dataset, which contains machine-generated toxic and benign statements about minority groups.\n"
         elif domain == "hsd":
-            return ""
+            return "The claim comes from the Hate Speech Detection dataset, which contains human-generated hate speech from a white supremacy forum. \n"
         elif domain == "mgfn":
-            return "The claim comes from a domain that produces machine-generated fake news."
+            return "The claim comes from the Machine Generated Fake News UniLC dataset, which contains machine-generated news.\n"
         elif domain == "climate":
-            return ""
+            return "The claim comes from the Climate Fever dataset, which is a dataset of human generated climate-change-related claims.\n"
         elif domain == "health":
-            return ""
+            return "The claim comes from a Health fact-checking dataset, which contains human generated healh claims.\n"
+        
+def generate_evidence(prompt, model_id_or_path="mistralai/Mistral-7B-Instruct-v0.2"):
+    evidence = ''
+    model, tokenizer = None, None
+
+    device = "cuda" # the device to load the model onto
+   
+    model = AutoModelForCausalLM.from_pretrained(model_id_or_path)
+    tokenizer = AutoTokenizer.from_pretrained(model_id_or_path)
+    
+    encodeds = tokenizer.apply_chat_template(prompt, return_tensors="pt")
+
+    model_inputs = encodeds.to(device)
+    model.to(device)
+
+    generated_ids = model.generate(model_inputs, max_new_tokens=1000, do_sample=True)
+    decoded = tokenizer.batch_decode(generated_ids)
+
+    evidence = decoded[0]
+
+    print(evidence)
+    return evidence

@@ -6,6 +6,7 @@ from torch.utils.data import DataLoader
 from utils.file_utils import load_jsonl, dump_jsonl
 from phi.phi_utils.dataset import PhiPromptDataset
 from phi.phi_utils.model_setup import model_and_tokenizer_setup
+from transformers import AutoTokenizer, AutoModelForCausalLM
 
 torch.set_default_device("cuda")
 
@@ -59,6 +60,28 @@ def batch_prompt(model, tokenizer, annotations_filepath, output_filepath, prompt
                 })
 
     dump_jsonl(output_data, output_filepath)
+
+def generate_evidence(prompt, model_id_or_path="mistralai/Mistral-7B-Instruct-v0.2"):
+    evidence = ''
+    model, tokenizer = None, None
+
+    device = "cuda" # the device to load the model onto
+   
+    model = AutoModelForCausalLM.from_pretrained(model_id_or_path)
+    tokenizer = AutoTokenizer.from_pretrained(model_id_or_path)
+    
+    encodeds = tokenizer.apply_chat_template(prompt, return_tensors="pt")
+
+    model_inputs = encodeds.to(device)
+    model.to(device)
+
+    generated_ids = model.generate(model_inputs, max_new_tokens=1000, do_sample=True)
+    decoded = tokenizer.batch_decode(generated_ids)
+
+    evidence = decoded[0]
+
+    print(evidence)
+    return evidence
 
 def main(args):
     model, tokenizer = model_and_tokenizer_setup(args.model_id_or_path)
