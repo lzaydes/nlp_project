@@ -1,4 +1,5 @@
 import pandas as pd
+from torch import device
 from torch.utils.data import Dataset
 from utils.file_utils import load_jsonl
 from phi.phi_utils.constants import PHI_ZERO_SHOT_EVAL_PROMPT, PHI_FEW_SHOT_EVAL_PROMPT, PHI_ZERO_SHOT_EVIDENCE_EVAL_PROMPT, PHI_ZERO_SHOT_EVIDENCE_PROMPT
@@ -79,7 +80,7 @@ def generate_evidence(prompt, model_id_or_path="mistralai/Mistral-7B-Instruct-v0
     evidence = ''
     model, tokenizer = None, None
 
-    device = "cuda" # the device to load the model onto
+    device = device("cuda") # the device to load the model onto
    
     model = AutoModelForCausalLM.from_pretrained(model_id_or_path)
     tokenizer = AutoTokenizer.from_pretrained(model_id_or_path)
