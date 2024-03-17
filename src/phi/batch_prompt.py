@@ -31,6 +31,9 @@ def batch_prompt(model, tokenizer, annotations_filepath, output_filepath, prompt
     output_data = []
     for batch in tqdm(prompt_dataloader):
         output_texts = []
+        
+        eos_token = "<|endoftext|>"
+
         ##################################################
         # TODO: Please complete the implementation of this 
         # for loop. You need to tokenize a batch of samples
@@ -40,28 +43,50 @@ def batch_prompt(model, tokenizer, annotations_filepath, output_filepath, prompt
         # is what should be the output of the program snippet 
         # within TODO
         tokens = tokenizer(batch, return_tensors="pt", padding = True, truncation = True)
-        outputs = model.generate(**tokens, max_new_tokens=10)
+        outputs = None
+        
+        if prompt_type != "zero_evidence":
+            outputs = model.generate(**tokens, max_new_tokens=10)
+        else:
+            outputs = generate_evidence(**tokens)
+
         text = tokenizer.batch_decode(outputs)[0]
         output_texts.append(text)
         # End of TODO.
         ##################################################
 
         for output_text in output_texts:
-            final_response = output_text.split("Output:")[-1].split("<|endoftext|>")[0]
-            tmp_response = final_response.lower()
-            if "refutes" in tmp_response or "false" in tmp_response:
-                predicted_label = "REFUTES"
-            else:
-                predicted_label = "SUPPORTS"
+            if prompt_type == "zero_evidence":
+                output_data = []
+                
+                claim = find_json_tag(output_text, "Claim: ", "\n")
+                task_type = find_json_tag(output_text, "task_type: ", "\n")
+                information = find_json_tag(output_text, "Information: ", "\n")
+                evidence = find_json_tag(output_text, "Evidence Output:\n", eos_token)
 
-            output_data.append({
-                "final_response":final_response,
-                "label":predicted_label
-                })
+                output_data.append({
+                    "claim":claim,
+                    "task_type":task_type,
+                    "information":information,
+                    "evidence":evidence
+                    })
+            
+            else:
+                final_response = output_text.split("Output:")[-1].split("<|endoftext|>")[0]
+                tmp_response = final_response.lower()
+                if "refutes" in tmp_response or "false" in tmp_response:
+                    predicted_label = "REFUTES"
+                else:
+                    predicted_label = "SUPPORTS"
+
+                output_data.append({
+                    "final_response":final_response,
+                    "label":predicted_label
+                    })
 
     dump_jsonl(output_data, output_filepath)
 
-def generate_evidence(prompt):
+def generate_evidence(**tokens):
     evidence = ''
     model, tokenizer = None, None
     model_id_or_path = 'microsoft/phi-2'
@@ -74,13 +99,17 @@ def generate_evidence(prompt):
     model = AutoModelForCausalLM.from_pretrained(model_id_or_path, torch_dtype=torch.float16, trust_remote_code=True)
     tokenizer = AutoTokenizer.from_pretrained(model_id_or_path, trust_remote_code=True, padding_side="left", pad_token=eos_token)
 
-    tokens = tokenizer(prompt, return_tensors="pt", padding = True, truncation = True, return_attention_mask=False)
     outputs = model.generate(**tokens, max_new_tokens=1000)
-    text = tokenizer.batch_decode(outputs)[0]
+    return outputs
 
-    print("Text: ", text)
-    return text
-
+def find_json_tag(prompt, tag, end_token):
+    try:
+        start = prompt.index(tag) + len(tag)
+        end = prompt.index(end_token, start)
+        return prompt[start:end]
+    except:
+        return ""
+    
 def main(args):
     model, tokenizer = model_and_tokenizer_setup(args.model_id_or_path)
     batch_prompt(model=model, tokenizer=tokenizer, annotations_filepath=args.annotations_filepath, output_filepath=args.output_filepath, prompt_type=args.prompt_type, evidence_filepath=args.evidence_filepath, batch_size=args.batch_size)
