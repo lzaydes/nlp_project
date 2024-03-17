@@ -5,7 +5,7 @@ from torch.utils.data import DataLoader
 
 from utils.file_utils import load_jsonl, dump_jsonl
 from phi.phi_utils.dataset import PhiPromptDataset
-from phi.phi_utils.model_setup import model_and_tokenizer_setup
+from phi.phi_utils.model_setup import model_and_tokenizer_setup, evidence_model_and_tokenizer_setup
 from transformers import AutoTokenizer, AutoModelForCausalLM
 
 torch.set_default_device("cuda")
@@ -44,12 +44,8 @@ def batch_prompt(model, tokenizer, annotations_filepath, output_filepath, prompt
         # within TODO
         tokens = tokenizer(batch, return_tensors="pt", padding = True, truncation = True)
         outputs = None
+        outputs = model.generate(**tokens, max_new_tokens=20)
         
-        if prompt_type != "zero_evidence":
-            outputs = model.generate(**tokens, max_new_tokens=10)
-        else:
-            outputs = generate_evidence(**tokens)
-
         text = tokenizer.batch_decode(outputs)[0]
         output_texts.append(text)
         # End of TODO.
@@ -57,12 +53,13 @@ def batch_prompt(model, tokenizer, annotations_filepath, output_filepath, prompt
 
         for output_text in output_texts:
             if prompt_type == "zero_evidence":
-                output_data = []
-                
+                print("OUTPUT TEXT: ", output_text)
                 claim = find_json_tag(output_text, "Claim: ", "\n")
                 task_type = find_json_tag(output_text, "task_type: ", "\n")
                 information = find_json_tag(output_text, "Information: ", "\n")
-                evidence = find_json_tag(output_text, "Evidence Output:\n", eos_token)
+                evidence_ind = output_text.index("Evidence Output:")
+                evidence = output_text[evidence_ind + len("Evidence Output:\n"):]
+                #evidence = find_json_tag(output_text, "Evidence Output:\n", eos_token)
 
                 output_data.append({
                     "claim":claim,
@@ -83,7 +80,8 @@ def batch_prompt(model, tokenizer, annotations_filepath, output_filepath, prompt
                     "final_response":final_response,
                     "label":predicted_label
                     })
-
+    print("Output: ", output_data)
+    print("File path: ", output_filepath)  
     dump_jsonl(output_data, output_filepath)
 
 def generate_evidence(**tokens):
@@ -111,7 +109,11 @@ def find_json_tag(prompt, tag, end_token):
         return ""
     
 def main(args):
-    model, tokenizer = model_and_tokenizer_setup(args.model_id_or_path)
+    
+    if args.prompt_type == "zero_evidence":
+         model, tokenizer = evidence_model_and_tokenizer_setup("openlm-research/open_llama_7b")
+    else:
+         model, tokenizer = model_and_tokenizer_setup(args.model_id_or_path)
     batch_prompt(model=model, tokenizer=tokenizer, annotations_filepath=args.annotations_filepath, output_filepath=args.output_filepath, prompt_type=args.prompt_type, evidence_filepath=args.evidence_filepath, batch_size=args.batch_size)
 
 if __name__ == "__main__":

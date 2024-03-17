@@ -1,6 +1,6 @@
 # TODO - import relevant model and tokenizer modules from transformers
 import torch
-from transformers import AutoTokenizer, AutoModelForCausalLM
+from transformers import AutoTokenizer, AutoModelForCausalLM, OpenLlamaForCausalLM
 
 # helper function provided to get model info
 def get_model_info(model):
@@ -42,3 +42,11 @@ def model_and_tokenizer_setup(model_id_or_path):
     # get_model_info(model)
 
     return model, tokenizer
+
+def evidence_model_and_tokenizer_setup(model_id_or_path):
+     model, tokenizer = None, None
+     eos_token = "<|endoftext|>"
+     model = OpenLlamaForCausalLM.from_pretrained(model_id_or_path, trust_remote_code=True)
+     tokenizer = AutoTokenizer.from_pretrained(model_id_or_path, trust_remote_code=True, padding_side="left", pad_token=eos_token) 
+     
+     return model, tokenizer
