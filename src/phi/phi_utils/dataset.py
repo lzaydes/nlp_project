@@ -34,39 +34,42 @@ class PhiPromptDataset(Dataset):
         if self.prompt_type == 'zero_eval':
             prompt = PHI_ZERO_SHOT_EVAL_PROMPT
             prompt = prompt.format(**self.data[idx])
-            return prompt
+
         elif self.prompt_type == 'few_eval':
             prompt = PHI_FEW_SHOT_EVAL_PROMPT
             prompt = prompt.format(**self.data[idx])
-            return prompt
+
         elif self.prompt_type == 'zero_evidence':
             prompt = PHI_ZERO_SHOT_EVIDENCE_PROMPT
+
+            self.data[idx].update({"information": self.generate_information(idx)})
+            prompt = prompt.format(**self.data[idx])
+
         elif self.prompt_type == 'zero_evidence_eval':
             prompt = PHI_ZERO_SHOT_EVIDENCE_EVAL_PROMPT
-            prompt = self.zero_shot_evidence_evaluate_prompt_transform(idx)
+            evidence = self.evidence_data
+
+            self.data[idx].update(self.evidence_data[idx])
+
+            prompt = prompt.format(**self.data[idx])
         # End of TODO.
         ##################################################
         
         return prompt
 
-
-    def zero_shot_evidence_prompt_transform(self, idx):
-        prompt = ""
-
-
-        return prompt
-
-    # gtp4 for classification/evidence output?
-    # zero_shot_evidence_prompt generates data for a given claim
-    # it seems that this function evaluates the results? and compares them to evidence in dummy_evidence.json
-    def zero_shot_evidence_evaluate_prompt_transform(self, idx):
-        prompt = PHI_ZERO_SHOT_EVIDENCE_EVAL_PROMPT
-        evidence = self.evidence_data
-
-        self.data[idx].update(self.evidence_data[idx])
-
-        prompt = prompt.format(**self.data[idx])
-        print(f'{prompt}\n')
+    def generate_information(self, idx):
+        domain = self.data[idx]["domain"]
+        info = ""
         
-        return prompt
-        
+        if domain == "sbic":
+            return ""
+        elif domain == "toxigen":
+            return ""
+        elif domain == "hsd":
+            return ""
+        elif domain == "mgfn":
+            return "The claim comes from a domain that produces machine-generated fake news."
+        elif domain == "climate":
+            return ""
+        elif domain == "health":
+            return ""
