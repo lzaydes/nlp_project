@@ -1,9 +1,10 @@
 import pandas as pd
-from torch import device
+import torch
 from torch.utils.data import Dataset
-from utils.file_utils import load_jsonl
+from utils.file_utils import load_jsonl, dump_jsonl
 from phi.phi_utils.constants import PHI_ZERO_SHOT_EVAL_PROMPT, PHI_FEW_SHOT_EVAL_PROMPT, PHI_ZERO_SHOT_EVIDENCE_EVAL_PROMPT, PHI_ZERO_SHOT_EVIDENCE_PROMPT
 from transformers import AutoTokenizer, AutoModelForCausalLM
+import re
 
 class PhiPromptDataset(Dataset):
     def __init__(self, annotations_filepath, prompt_type, evidence_filepath = None):
@@ -29,6 +30,7 @@ class PhiPromptDataset(Dataset):
     def __getitem__(self, idx):
 
         prompt = ""
+        eos_token = "<|endoftext|>"
         ##################################################
         # TODO: Please complete the implementation of __getitem__
         # You may use if-else statements to choose the prompt
@@ -46,7 +48,23 @@ class PhiPromptDataset(Dataset):
 
             self.data[idx].update({"information": self.generate_information(idx)})
             prompt = prompt.format(**self.data[idx])
-            generate_evidence(prompt)
+            prompt = self.generate_evidence(prompt)
+
+            output_data = []
+            
+            claim = find_json_tag(prompt, "Claim: ", "\n")
+            task_type = find_json_tag(prompt, "task_type: ", "\n")
+            information = find_json_tag(prompt, "Information: ", "\n")
+            evidence = find_json_tag(prompt, "Evidence Output:\n", eos_token)
+
+            output_data.append({
+                "claim":claim,
+                "task_type":task_type,
+                "information":information,
+                "evidence":evidence
+                })
+        
+            dump_jsonl(output_data, "data/evidence.jsonl")
 
         elif self.prompt_type == 'zero_evidence_eval':
             prompt = PHI_ZERO_SHOT_EVIDENCE_EVAL_PROMPT
@@ -76,24 +94,30 @@ class PhiPromptDataset(Dataset):
         elif domain == "health":
             return "The claim comes from a Health fact-checking dataset, which contains human generated healh claims.\n"
         
-def generate_evidence(prompt, model_id_or_path="mistralai/Mistral-7B-Instruct-v0.2"):
-    evidence = ''
-    model, tokenizer = None, None
+    def generate_evidence(self, prompt):
+        evidence = ''
+        model, tokenizer = None, None
+        model_id_or_path = 'microsoft/phi-2'
+        device = "cuda" # the device to load the model onto
 
-    device = device("cuda") # the device to load the model onto
-   
-    model = AutoModelForCausalLM.from_pretrained(model_id_or_path)
-    tokenizer = AutoTokenizer.from_pretrained(model_id_or_path)
+        torch.set_default_device("cuda")
+
+        eos_token = "<|endoftext|>"
     
-    encodeds = tokenizer.apply_chat_template(prompt, return_tensors="pt")
+        model = AutoModelForCausalLM.from_pretrained(model_id_or_path, torch_dtype=torch.float16, trust_remote_code=True)
+        tokenizer = AutoTokenizer.from_pretrained(model_id_or_path, trust_remote_code=True, padding_side="left", pad_token=eos_token)
 
-    model_inputs = encodeds.to(device)
-    model.to(device)
+        tokens = tokenizer(prompt, return_tensors="pt", padding = True, truncation = True, return_attention_mask=False)
+        outputs = model.generate(**tokens, max_new_tokens=1000)
+        text = tokenizer.batch_decode(outputs)[0]
 
-    generated_ids = model.generate(model_inputs, max_new_tokens=1000, do_sample=True)
-    decoded = tokenizer.batch_decode(generated_ids)
-
-    evidence = decoded[0]
-
-    print(evidence)
-    return evidence
+        print("Text: ", text)
+        return text
+    
+def find_json_tag(prompt, tag, end_token):
+    try:
+        start = prompt.index(tag) + len(tag)
+        end = prompt.index(end_token, start)
+        return prompt[start:end]
+    except:
+        return ""
