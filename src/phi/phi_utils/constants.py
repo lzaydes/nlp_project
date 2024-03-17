@@ -35,7 +35,7 @@ PHI_ZERO_SHOT_EVIDENCE_EVAL_PROMPT = '''
 Instruct:
 You will be given a claim and evidence for the claim. Using commonsense reasoning, claim and evidence, you need to respond with SUPPORTS or REFUTES, depending on whether you support or refute the claim.
 Claim:{claim}
-Evidence: {evidence_sample}
+Evidence: {evidence}
 Is the claim {task_type}? 
 Respond with SUPPORTS or REFUTES
 Output:

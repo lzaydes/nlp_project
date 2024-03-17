@@ -61,27 +61,25 @@ def batch_prompt(model, tokenizer, annotations_filepath, output_filepath, prompt
 
     dump_jsonl(output_data, output_filepath)
 
-def generate_evidence(prompt, model_id_or_path="mistralai/Mistral-7B-Instruct-v0.2"):
+def generate_evidence(prompt):
     evidence = ''
     model, tokenizer = None, None
-
+    model_id_or_path = 'microsoft/phi-2'
     device = "cuda" # the device to load the model onto
-   
-    model = AutoModelForCausalLM.from_pretrained(model_id_or_path)
-    tokenizer = AutoTokenizer.from_pretrained(model_id_or_path)
-    
-    encodeds = tokenizer.apply_chat_template(prompt, return_tensors="pt")
 
-    model_inputs = encodeds.to(device)
-    model.to(device)
+    torch.set_default_device("cuda")
 
-    generated_ids = model.generate(model_inputs, max_new_tokens=1000, do_sample=True)
-    decoded = tokenizer.batch_decode(generated_ids)
+    eos_token = "<|endoftext|>"
 
-    evidence = decoded[0]
+    model = AutoModelForCausalLM.from_pretrained(model_id_or_path, torch_dtype=torch.float16, trust_remote_code=True)
+    tokenizer = AutoTokenizer.from_pretrained(model_id_or_path, trust_remote_code=True, padding_side="left", pad_token=eos_token)
 
-    print(evidence)
-    return evidence
+    tokens = tokenizer(prompt, return_tensors="pt", padding = True, truncation = True, return_attention_mask=False)
+    outputs = model.generate(**tokens, max_new_tokens=1000)
+    text = tokenizer.batch_decode(outputs)[0]
+
+    print("Text: ", text)
+    return text
 
 def main(args):
     model, tokenizer = model_and_tokenizer_setup(args.model_id_or_path)

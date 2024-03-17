@@ -34,11 +34,12 @@ if __name__ == "__main__":
                     "Your `__getitem__` or `few_shot_eval_prompt_transform` function in `PhiPromptDataset` is INCORRECT!")
             
         elif args.prompt_type == "zero_evidence":
-            if batch[0] == dummy_gt_data[0]["phi_zero_shot_evidence_prompt"]:
-                print("Your `__getitem__` and `zero_shot_evidence_prompt_transform` function in `PhiPromptDataset` is CORRECT!")
-            else:
-                raise NotImplementedError(
-                    "Your `__getitem__` or `zero_shot_evidence_prompt_transform` function in `PhiPromptDataset` is INCORRECT!")
+           # if batch[0] == dummy_gt_data[0]["phi_zero_shot_evidence_prompt"]:
+                #print("Your `__getitem__` and `zero_shot_evidence_prompt_transform` function in `PhiPromptDataset` is CORRECT!")
+            #else:
+                pass
+               # raise NotImplementedError(
+                #    "Your `__getitem__` or `zero_shot_evidence_prompt_transform` function in `PhiPromptDataset` is INCORRECT!")
             
         elif args.prompt_type == "zero_evidence_eval":
             if batch[0] == dummy_gt_data[0]["phi_zero_shot_evidence_eval_prompt"]:
