@@ -111,7 +111,7 @@ def find_json_tag(prompt, tag, end_token):
 def main(args):
     
     if args.prompt_type == "zero_evidence":
-         model, tokenizer = evidence_model_and_tokenizer_setup("openlm-research/open_llama_7b")
+         model, tokenizer = evidence_model_and_tokenizer_setup("microsoft/phi-2")
     else:
          model, tokenizer = model_and_tokenizer_setup(args.model_id_or_path)
     batch_prompt(model=model, tokenizer=tokenizer, annotations_filepath=args.annotations_filepath, output_filepath=args.output_filepath, prompt_type=args.prompt_type, evidence_filepath=args.evidence_filepath, batch_size=args.batch_size)

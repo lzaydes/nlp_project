@@ -44,9 +44,15 @@ def model_and_tokenizer_setup(model_id_or_path):
     return model, tokenizer
 
 def evidence_model_and_tokenizer_setup(model_id_or_path):
-     model, tokenizer = None, None
-     eos_token = "<|endoftext|>"
-     model = OpenLlamaForCausalLM.from_pretrained(model_id_or_path, trust_remote_code=True)
-     tokenizer = AutoTokenizer.from_pretrained(model_id_or_path, trust_remote_code=True, padding_side="left", pad_token=eos_token) 
+    model, tokenizer = None, None
+    eos_token = "<|endoftext|>"
+
+    if model_id_or_path == "openlm-research/open_llama_7b":
+        model = AutoModelForCausalLM.from_pretrained(model_id_or_path, trust_remote_code=True)
+        tokenizer = AutoTokenizer.from_pretrained(model_id_or_path, trust_remote_code=True, padding_side="left", pad_token=eos_token) 
      
-     return model, tokenizer
+    elif model_id_or_path == "microsoft/phi-2":
+        model = AutoModelForCausalLM.from_pretrained(model_id_or_path, torch_dtype=torch.float16, trust_remote_code=True)
+        tokenizer = AutoTokenizer.from_pretrained(model_id_or_path, trust_remote_code=True, padding_side="left", pad_token=eos_token)
+
+    return model, tokenizer
